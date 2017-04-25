@@ -11,7 +11,8 @@
 			float: left;
 		}
 		.cssImageName {
-			width: 250px;
+			width: 300px;
+			height: 20px;
 			margin: 10px;
 			padding: 10px;
 			float: left;
@@ -21,7 +22,8 @@
 			border: 1px solid;
 		}
 		.cssContainerName {
-			width: 200px;
+			width: 150px;
+			height: 20px;
 			margin: 10px;
 			padding: 10px;
 			float: left;
@@ -32,6 +34,7 @@
 		}
 		.cssDeviceID {
 			width: 150px;
+			height: 20px;
 			margin: 10px;
 			padding: 10px;
 			float: left;
@@ -42,6 +45,7 @@
 		}
 		.cssContainerStatus {
 			width: 100px;
+			height: 20px;
 			margin: 10px;
 			padding: 10px;
 			float: left;
@@ -111,7 +115,6 @@
 			}
 		}
 
-
 		function clearDisplay() {
 			clearElement("ImageVersion");
 			clearElement("UpdateImage");
@@ -120,15 +123,6 @@
 			clearElement("DeviceID");
 			clearElement("ContainerStatus");
 			clearElement("TextAlign");
-		}
-
-		function displayFullString() {
-			console.log("displayFullString()");
-		}
-
-		function eventFromBox(elementId) {
-			document.getElementById(elementId).style.color = "Black";
-			console.log("eventFromBox: " + elementId);
 		}
 
 		function display(msg) {
@@ -156,7 +150,17 @@
 
 					document.body.appendChild(divImageName);
 					document.getElementById(divImageName.id).className = "cssImageName";
-					document.getElementById(divImageName.id).onmouseover = eventFromBox(divImageName.id);
+
+					/*************************************************************************************************/
+					/* When created container from docker service, there is "@sha256:xxxxxxxx" string at image name. */
+					/* For managing ImageName, it should be removed.                                                 */
+					/*************************************************************************************************/
+
+					var str = msg[i].ContainerInfo[j].ImageName;
+					if(str.indexOf("@") > 0) {
+						msg[i].ContainerInfo[j].ImageName = str.substring(0, str.indexOf("@"));
+					}
+					/*************************************************************************************************/
 					document.getElementById(divImageName.id).innerHTML = msg[i].ContainerInfo[j].ImageName;
 
 					document.body.appendChild(divContainerName);
@@ -236,11 +240,6 @@
 			}
 			inputImageName = strTemp + ":" + inputImageVersion;
 
-			/*******************************************************************/
-			/* temp code for input Full image name through "Version" text box */
-			inputImageName = inputImageVersion;
-			/*******************************************************************/
-
 			console.log("[updateImage] inputImageVersion: " + inputImageVersion);
 			console.log("[updateImage] inputImageName: " + inputImageName);
 			console.log("[updateImage] inputDeviceID: " + inputDeviceID);
@@ -306,33 +305,23 @@
         <font face="Arial">
 		<form name=frm>
 			<h1>container management</h1>
-<!--
-			<div id="ContainerID" class="textBox">ContainerID</div>
-			<div id="DeviceID" class="textBox">DeviceID</div>
-			<div id="ContainerStatus" class="textBox">ContainerStatus</div>
--->
+
 			<div id="InputRequest" style="clear:left">
 	        	<button type="button" onclick='getContainersInfo()'>getContainersInfo</button>
 	    	    <button type="button" onclick='getDeviceState()'>getDeviceState</button>
 			</div>
 			<hr>
 			<b>
-				<div style="width:250px; margin:10px; padding:10px; float:left">Image</div>
-				<div style="width:200px; margin:10px; padding:10px; float:left">Container</div>
+				<div style="width:300px; margin:10px; padding:10px; float:left">Image</div>
+				<div style="width:150px; margin:10px; padding:10px; float:left">Container</div>
 				<div style="width:150px; margin:10px; padding:10px; float:left">Device</div>
-				<div style="width:150px; margin:10px; padding:10px; float:left">Status</div>
+				<div style="width:150px; margin:10px; padding:10px; float:left">State</div>
 			</b>
 			<div style="clear:left"></div>
 		</form>
 
 		<script>initContentsDisplay();</script>
 
-<!--
-		<div id="pre_set" style="display:none">
-    		<input type="text" name="" value="" style="width:200px">
-		</div>
-		<div id="field"></div>
--->
       	</font>
 	</body>
 </html>

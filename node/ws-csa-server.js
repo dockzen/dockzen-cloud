@@ -17,21 +17,21 @@ console.log('csa port = ', wss.options.port);
 
 
 function send_connection(ws) {
-		ws.send(JSON.stringify({ cmd: 'connected',
-				token: ws.upgradeReq.headers['sec-websocket-key'],
-				clientnum: ws._socket._server._connections}),
-		function (err) {
-			if (err) {
-				console.log("ws.send connected :", err);
-			}
-		});
+	ws.send(JSON.stringify({ cmd: 'connected',
+		token: ws.upgradeReq.headers['sec-websocket-key'],
+		clientnum: ws._socket._server._connections}),
+	function (err) {
+		if (err) {
+			console.log("ws.send connected :", err);
+		}
+	});
 }
 
 // send message into client
 //		message = format of CSA
 // need to add destination
-//		destination = "" : send to all connected clients
-//		destination = [ID] : ??????????????????????
+//		destination = "ALL" : send to all connected clients
+//		destination = [DeviceID] : send to only one device
 function send_mesg_direct(sendMsg, destClient) {
 	var index;
 
@@ -44,9 +44,11 @@ function send_mesg_direct(sendMsg, destClient) {
 
 	ws_client_list.resetCursor();
 	while (ws_client_list.next()) {
-		console.log("-----------------------");
+		console.log("----- To csac [%s] -----", ws_client_list.current.clientname);
 		console.log("list.length =", ws_client_list.length)
-		console.log("<direct> keyID ={%s} client{%s}", ws_client_list.current.upgradeReq.headers['sec-websocket-key'], ws_client_list.current.clientname);
+		console.log("<direct> keyID ={%s} client{%s}"
+			, ws_client_list.current.upgradeReq.headers['sec-websocket-key']
+			, ws_client_list.current.clientname);
 		console.log("<direct> send command: " + sendMsg);
 		console.log("<direct> destClient: " + destClient);
 
@@ -56,7 +58,9 @@ function send_mesg_direct(sendMsg, destClient) {
 				if(err) {
 					// if error, remove the client in lists
 					console.info("<direct>ws.send :", err);
-					console.log("remove keyID ={%s} client{%s}", ws_client_list.current.upgradeReq.headers['sec-websocket-key'], ws_client_list.current.clientname);
+					console.log("remove keyID ={%s} client{%s}"
+						, ws_client_list.current.upgradeReq.headers['sec-websocket-key']
+						, ws_client_list.current.clientname);
 					ws_client_list.current.close();
 					console.log("remove linst{%s} ", ws_client_list.removeCurrent());
 					ws_client_list.resetCursor();
@@ -101,7 +105,7 @@ function responseToWeb(ws, message) {
 		var found = 0;
 
 		TargetInfoList.resetCursor();
-	    while (TargetInfoList.next()) {
+		while (TargetInfoList.next()) {
 			if(ws.upgradeReq.headers['sec-websocket-key'] == TargetInfoList.current.key) {
 				console.log("<toWeb> found same key =%s", TargetInfoList.current.key);
 				found =1;
@@ -141,12 +145,11 @@ function responseToWeb(ws, message) {
                 }
 			}
 			// send data to web...
+			console.log("----- To web-server -----");
+			console.log(msg_str);
 			send_web(msg_str);
-
-
 		}
 		// bind all target response into a single message
-
 	}
 	else
 	{
@@ -177,6 +180,7 @@ wss.on("connection", function connection(ws) {
 
 
 	ws.on('message', function incoming(message) {
+		console.log("----- From csac [%s] -----", JSON.parse(message).DeviceID);
 		console.log('received: %s', message);
 		console.log('received cmd: %s', JSON.parse(message).cmd);
 
@@ -190,7 +194,9 @@ wss.on("connection", function connection(ws) {
 				console.log("ws.connections =", ws._socket._server._connections);
 				ws_client_list.resetCursor();
 				while (ws_client_list.next()) {
-					console.log("keyID ={%s} client ={%s}", ws_client_list.current.upgradeReq.headers['sec-websocket-key'], ws_client_list.current.clientname);
+					console.log("keyID ={%s} client ={%s}"
+						, ws_client_list.current.upgradeReq.headers['sec-websocket-key']
+						, ws_client_list.current.clientname);
 				}
 				send_connection(ws);
 				break;
@@ -198,7 +204,6 @@ wss.on("connection", function connection(ws) {
 				responseToWeb(this, message);
 				break;
 		}
-		//responseToWeb(this, message);
 	});
 
 	if (ws.readyState === ws.OPEN) {
@@ -287,6 +292,7 @@ wssin.on("connection", function connection(ws) {
 
 	ws_web = ws;
 	ws.on('message', function incoming(message) {
+		console.log("----- From web-server -----");
 		console.log('internal port received: %s', message);
 
 		// conver message(WEB) into message(CSA)
