@@ -10,6 +10,12 @@
 			padding: 10px;
 			float: left;
 		}
+		.cssFullString {
+			margin: 10px;
+			padding: 10px;
+			float: left;
+			border: 1px solid;
+		}
 		.cssImageName {
 			width: 300px;
 			height: 20px;
@@ -87,6 +93,7 @@
 		}
 		ws.onmessage = function(event) {
 			var msg = JSON.parse(event.data);
+			var command = "";
 
 			console.log("received data:\n");
 			console.log(event.data);
@@ -96,8 +103,19 @@
 			/* need to seperate Cmd for displaying http page */
 			/*************************************************/
 			if(msg.length > 0) {
-				clearDisplay();
-				display(msg);
+				command = msg[0].Cmd;
+			} else {
+				command = msg.Cmd;
+			}
+			console.log("msg.Cmd: " + command);
+
+			switch(command) {
+				case "GetContainersInfo":
+					clearDisplay();
+					display(msg);
+					break;
+				default:
+					break;
 			}
 		}
 
@@ -125,6 +143,21 @@
 			clearElement("TextAlign");
 		}
 
+		function mouseOver(event) {
+			var thisElement = event.getAttribute("id");
+
+			console.log("[mouseOver] thisElement: " + thisElement);
+			document.getElementById(thisElement).className = "cssFullString";
+		}
+
+		function mouseOut(event) {
+			var thisElement = event.getAttribute("id");
+			var thisClassName = "css" + thisElement.substring(0, thisElement.indexOf("["));
+
+			console.log("[mouseOut] thisElement: " + thisElement);
+			document.getElementById(thisElement).className = thisClassName;
+		}
+
 		function display(msg) {
 			var displayIndex = 0;
 
@@ -148,21 +181,23 @@
 					divTextAlign.id = "TextAlign[" + displayIndex + "]";
 					displayIndex++;
 
+					divImageName.setAttribute("onmouseover", "mouseOver(this)");
+					divImageName.setAttribute("onmouseout", "mouseOut(this)");
 					document.body.appendChild(divImageName);
 					document.getElementById(divImageName.id).className = "cssImageName";
-
 					/*************************************************************************************************/
 					/* When created container from docker service, there is "@sha256:xxxxxxxx" string at image name. */
 					/* For managing ImageName, it should be removed.                                                 */
 					/*************************************************************************************************/
-
-					var str = msg[i].ContainerInfo[j].ImageName;
-					if(str.indexOf("@") > 0) {
-						msg[i].ContainerInfo[j].ImageName = str.substring(0, str.indexOf("@"));
-					}
+//					var str = msg[i].ContainerInfo[j].ImageName;
+//					if(str.indexOf("@") > 0) {
+//						msg[i].ContainerInfo[j].ImageName = str.substring(0, str.indexOf("@"));
+//					}
 					/*************************************************************************************************/
 					document.getElementById(divImageName.id).innerHTML = msg[i].ContainerInfo[j].ImageName;
 
+					divContainerName.setAttribute("onmouseover", "mouseOver(this)");
+					divContainerName.setAttribute("onmouseout", "mouseOut(this)");
 					document.body.appendChild(divContainerName);
 					document.getElementById(divContainerName.id).className = "cssContainerName";
 					document.getElementById(divContainerName.id).innerHTML = msg[i].ContainerInfo[j].ContainerName;
@@ -302,18 +337,18 @@
 
 		</script>
 
-        <font face="Arial">
+		<font face="Arial">
 		<form name=frm>
 			<h1>container management</h1>
 
 			<div id="InputRequest" style="clear:left">
-	        	<button type="button" onclick='getContainersInfo()'>getContainersInfo</button>
-	    	    <button type="button" onclick='getDeviceState()'>getDeviceState</button>
+				<button type="button" onclick='getContainersInfo()'>getContainersInfo</button>
+				<button type="button" onclick='getDeviceState()'>getDeviceState</button>
 			</div>
 			<hr>
 			<b>
 				<div style="width:300px; margin:10px; padding:10px; float:left">Image</div>
-				<div style="width:150px; margin:10px; padding:10px; float:left">Container</div>
+				<div style="width:150px; margin:10px; padding:10px; float:left">Service</div>
 				<div style="width:150px; margin:10px; padding:10px; float:left">Device</div>
 				<div style="width:150px; margin:10px; padding:10px; float:left">State</div>
 			</b>
@@ -322,6 +357,6 @@
 
 		<script>initContentsDisplay();</script>
 
-      	</font>
+		</font>
 	</body>
 </html>
