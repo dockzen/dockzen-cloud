@@ -28,7 +28,7 @@
 			border: 1px solid;
 		}
 		.cssContainerName {
-			width: 150px;
+			width: 200px;
 			height: 20px;
 			margin: 10px;
 			padding: 10px;
@@ -181,23 +181,25 @@
 					divTextAlign.id = "TextAlign[" + displayIndex + "]";
 					displayIndex++;
 
-					divImageName.setAttribute("onmouseover", "mouseOver(this)");
-					divImageName.setAttribute("onmouseout", "mouseOut(this)");
+					/* When width checking func is implemented, it will be opened again */
+					//divImageName.setAttribute("onmouseover", "mouseOver(this)");
+					//divImageName.setAttribute("onmouseout", "mouseOut(this)");
 					document.body.appendChild(divImageName);
 					document.getElementById(divImageName.id).className = "cssImageName";
 					/*************************************************************************************************/
 					/* When created container from docker service, there is "@sha256:xxxxxxxx" string at image name. */
 					/* For managing ImageName, it should be removed.                                                 */
 					/*************************************************************************************************/
-//					var str = msg[i].ContainerInfo[j].ImageName;
-//					if(str.indexOf("@") > 0) {
-//						msg[i].ContainerInfo[j].ImageName = str.substring(0, str.indexOf("@"));
-//					}
+					var str = msg[i].ContainerInfo[j].ImageName;
+					if(str.indexOf("@") > 0) {
+						msg[i].ContainerInfo[j].ImageName = str.substring(0, str.indexOf("@"));
+					}
 					/*************************************************************************************************/
 					document.getElementById(divImageName.id).innerHTML = msg[i].ContainerInfo[j].ImageName;
 
-					divContainerName.setAttribute("onmouseover", "mouseOver(this)");
-					divContainerName.setAttribute("onmouseout", "mouseOut(this)");
+					/* When width checking func is implemented, it will be opened again */
+					//divContainerName.setAttribute("onmouseover", "mouseOver(this)");
+					//divContainerName.setAttribute("onmouseout", "mouseOut(this)");
 					document.body.appendChild(divContainerName);
 					document.getElementById(divContainerName.id).className = "cssContainerName";
 					document.getElementById(divContainerName.id).innerHTML = msg[i].ContainerInfo[j].ContainerName;
@@ -348,9 +350,10 @@
 			<hr>
 			<b>
 				<div style="width:300px; margin:10px; padding:10px; float:left">Image</div>
-				<div style="width:150px; margin:10px; padding:10px; float:left">Service</div>
+				<div style="width:200px; margin:10px; padding:10px; float:left">Service</div>
 				<div style="width:150px; margin:10px; padding:10px; float:left">Device</div>
-				<div style="width:150px; margin:10px; padding:10px; float:left">State</div>
+				<div style="width:100px; margin:10px; padding:10px; float:left">ServiceState</div>
+				<div style="width:100px; margin:10px; padding:10px; float:left">Version</div>
 			</b>
 			<div style="clear:left"></div>
 		</form>
